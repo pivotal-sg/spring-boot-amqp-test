@@ -3,3 +3,13 @@ spring:
     host: 192.168.99.100
     username: guest
     password: guest
+  datasource:
+    url: jdbc:postgresql://localhost/my_database
+    driverClassName: org.postgresql.Driver
+    username: neo
+  h2:
+    console:
+      enabled: true
+  jpa:
+    hibernate:
+      ddl-auto: create

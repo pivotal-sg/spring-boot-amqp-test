@@ -20,14 +20,27 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 
+import java.util.Arrays;
+import java.util.UUID;
+
 public class Sender {
 
-	@Autowired
-	private RabbitTemplate rabbitTemplate;
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
 
-	@Scheduled(fixedDelay = 1000L)
-	public void send() {
-		this.rabbitTemplate.convertAndSend("foo", "hello");
-	}
+    @Autowired
+    private EventRepository eventRepository;
+
+    @Scheduled(fixedDelay = 10000L)
+    public void send() {
+        final String uuid = UUID.randomUUID().toString();
+        final AbstractEvent employeeAdded = new EmployeeAdded("Added an employee", Arrays.asList("2016-01-01", "2017-02-02"), uuid);
+
+        eventRepository.save(employeeAdded);
+
+        System.out.println("Saved in database as: " + eventRepository.findOne(uuid));
+
+        this.rabbitTemplate.convertAndSend("event", employeeAdded);
+    }
 
 }
