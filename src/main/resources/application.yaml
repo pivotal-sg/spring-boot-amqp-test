@@ -4,9 +4,8 @@ spring:
     username: guest
     password: guest
   datasource:
-    url: jdbc:postgresql://localhost/my_database
-    driverClassName: org.postgresql.Driver
-    username: neo
+    url: jdbc:h2:mem:my_database
+    driverClassName: org.h2.Driver
   h2:
     console:
       enabled: true
