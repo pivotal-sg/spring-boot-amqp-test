@@ -1,8 +1,9 @@
-package sample.amqp;
+package sample.amqp.employees.events;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import sample.amqp.event.AbstractEvent;
 
 import javax.persistence.*;
 import java.util.List;

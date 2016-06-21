@@ -1,4 +1,4 @@
-package sample.amqp;
+package sample.amqp.employees.events;
 
 import java.util.ArrayList;
 import java.util.List;

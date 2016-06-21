@@ -1,4 +1,4 @@
-package sample.amqp;
+package sample.amqp.event;
 
 import javax.persistence.*;
 

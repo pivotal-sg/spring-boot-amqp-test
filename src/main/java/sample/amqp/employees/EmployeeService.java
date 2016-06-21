@@ -14,33 +14,37 @@
  * limitations under the License.
  */
 
-package sample.amqp;
+package sample.amqp.employees;
 
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
+import sample.amqp.event.AbstractEvent;
+import sample.amqp.event.EventRepository;
+import sample.amqp.employees.events.EmployeeAdded;
 
 import java.util.Arrays;
 import java.util.UUID;
 
-public class Sender {
+public class EmployeeService {
 
-    @Autowired
     private RabbitTemplate rabbitTemplate;
-
-    @Autowired
     private EventRepository eventRepository;
 
-    @Scheduled(fixedDelay = 10000L)
-    public void send() {
+    public EmployeeService(RabbitTemplate rabbitTemplate, EventRepository eventRepository) {
+        this.rabbitTemplate = rabbitTemplate;
+        this.eventRepository = eventRepository;
+    }
+
+    public String add(String name) {
         final String uuid = UUID.randomUUID().toString();
-        final AbstractEvent employeeAdded = new EmployeeAdded("Added an employee", Arrays.asList("2016-01-01", "2017-02-02"), uuid);
+        final AbstractEvent employeeAdded = new EmployeeAdded(name, Arrays.asList("2016-01-01", "2017-02-02"), uuid);
 
         eventRepository.save(employeeAdded);
 
         System.out.println("Saved in database as: " + eventRepository.findOne(uuid));
 
         this.rabbitTemplate.convertAndSend("event", employeeAdded);
+
+        return uuid;
     }
 
 }

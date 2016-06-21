@@ -1,4 +1,4 @@
-package sample.amqp;
+package sample.amqp.employees.events;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;

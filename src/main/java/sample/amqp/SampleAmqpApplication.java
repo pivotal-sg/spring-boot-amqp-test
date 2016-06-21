@@ -17,26 +17,30 @@
 package sample.amqp;
 
 import org.springframework.amqp.core.Queue;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.scheduling.annotation.EnableScheduling;
+import sample.amqp.employees.EmployeeRepository;
+import sample.amqp.employees.EmployeeService;
+import sample.amqp.event.EventRepository;
 
 @SpringBootApplication
 @EnableScheduling
-@EnableJpaRepositories("sample.amqp")
 public class SampleAmqpApplication {
 
+    @Autowired
 	@Bean
-	public Sender mySender() {
-		return new Sender();
+	public EmployeeService mySender(RabbitTemplate rabbitTemplate, EventRepository eventRepository) {
+		return new EmployeeService(rabbitTemplate, eventRepository);
 	}
 
     @Bean
-    public Receiver myReceiver() {
-        return new Receiver();
+    public EmployeeEventHandler myReceiver(EmployeeRepository employeeRepository) {
+        return new EmployeeEventHandler(employeeRepository);
     }
 
     @Bean
