@@ -10,6 +10,7 @@ internal application that uses Event Sourcing and CQRS.
 You'll need to install [Docker Toolbox](https://www.docker.com/products/docker-toolbox).
 
 Perform the following steps in the project directory:
+
 1. `docker-machine start default`
 1. `docker-compose up`
 1. Copy the machine's IP address obtained from this command: `docker-machine ip default`
