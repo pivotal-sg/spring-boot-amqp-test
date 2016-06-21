@@ -16,7 +16,7 @@
 		<url>http://www.spring.io</url>
 	</organization>
 	<properties>
-		<start-class>sample.amqp.SampleAmqpSimpleApplication</start-class>
+		<start-class>sample.amqp.SampleAmqpApplication</start-class>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -84,7 +84,7 @@
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>exec-maven-plugin</artifactId>
 				<configuration>
-					<mainClass>sample.amqp.SampleAmqpSimpleApplication</mainClass>
+					<mainClass>sample.amqp.SampleAmqpApplication</mainClass>
 				</configuration>
 			</plugin>
 		</plugins>

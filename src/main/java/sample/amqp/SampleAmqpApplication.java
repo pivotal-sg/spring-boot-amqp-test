@@ -27,7 +27,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @SpringBootApplication
 @EnableScheduling
 @EnableJpaRepositories("sample.amqp")
-public class SampleAmqpSimpleApplication {
+public class SampleAmqpApplication {
 
 	@Bean
 	public Sender mySender() {
@@ -51,7 +51,7 @@ public class SampleAmqpSimpleApplication {
 
 
     public static void main(String[] args) throws Exception {
-        SpringApplication.run(SampleAmqpSimpleApplication.class, args);
+        SpringApplication.run(SampleAmqpApplication.class, args);
     }
 
 }
