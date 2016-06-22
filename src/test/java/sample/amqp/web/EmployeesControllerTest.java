@@ -6,6 +6,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.json.JacksonJsonParser;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -37,7 +38,8 @@ public class EmployeesControllerTest {
     public void addEmployee() throws Exception {
         String contentAsString = mvc.perform(
                 post("/employees")
-                    .param("name", "John Tan")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content("{\"name\":\"John Tan\"}")
             )
             .andExpect(status().isOk())
             .andReturn()
