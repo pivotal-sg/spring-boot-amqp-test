@@ -10,7 +10,7 @@ import sample.amqp.employees.events.EmployeeAdded;
 import java.util.Date;
 
 @RabbitListener(queues = "event")
-public class EmployeeEventHandler {
+public class EmployeeEventHandler implements EventHandler {
 
     private final EmployeeRepository employeeRepository;
 

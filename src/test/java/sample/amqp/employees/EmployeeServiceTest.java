@@ -48,7 +48,7 @@ public class EmployeeServiceTest {
         ArgumentCaptor<EmployeeAdded> eventCaptor = ArgumentCaptor.forClass(EmployeeAdded.class);
         verify(rabbitTemplate, times(1)).convertAndSend(queueNameCaptor.capture(), eventCaptor.capture());
 
-        assertThat(queueNameCaptor.getValue()).isEqualTo("event");
+        assertThat(queueNameCaptor.getValue()).isEqualTo("event.employee");
         EmployeeAdded employeeAdded = eventCaptor.getValue();
         assertThat(employeeAdded.getName()).isEqualTo("Foo Bar");
         assertThat(employeeAdded.getUuid()).isEqualTo(employeeUuid);

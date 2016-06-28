@@ -2,58 +2,53 @@ package sample.amqp.web;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.json.JacksonJsonParser;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
-import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.context.WebApplicationContext;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import sample.amqp.employees.Employee;
+import sample.amqp.employees.EmployeeRepository;
+import sample.amqp.employees.EmployeeService;
 
-import static org.hamcrest.core.Is.is;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import java.util.Collections;
 
-@RunWith(SpringRunner.class)
-@SpringBootTest
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 public class EmployeesControllerTest {
-    @Autowired
-    private WebApplicationContext context;
+    // collaborators
+    private EmployeeService employeeService;
+    private EmployeeRepository employeeRepository;
 
-    private MockMvc mvc;
+    private EmployeesController employeesController;
 
     @Before
-    public void setUp() {
-        this.mvc = MockMvcBuilders.webAppContextSetup(this.context)
-                .alwaysDo(print())
-                .build();
+    public void setUp() throws Exception {
+        employeeService = mock(EmployeeService.class);
+        employeeRepository = mock(EmployeeRepository.class);
+
+        employeesController = new EmployeesController(employeeService, employeeRepository);
     }
 
     @Test
     public void addEmployee() throws Exception {
-        String contentAsString = mvc.perform(
-                post("/employees")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content("{\"name\":\"John Tan\"}")
-            )
-            .andExpect(status().isOk())
-            .andReturn()
-            .getResponse()
-            .getContentAsString();
+        when(employeeService.add("John Tan")).thenReturn("some random uuid");
 
-        String employeeUuid = (String) new JacksonJsonParser()
-                                            .parseMap(contentAsString)
-                                            .get("uuid");
+        ResponseEntity responseEntity = employeesController.addEmployee(Collections.singletonMap("name", "John Tan"));
 
-        mvc.perform(
-            get("/employees/" + employeeUuid)
-        ).andExpect(status().isOk())
-            .andExpect(jsonPath("$.name", is("John Tan")));
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(responseEntity.getBody()).isEqualTo(Collections.singletonMap("uuid", "some random uuid"));
+    }
+
+    @Test
+    public void showEmployee() throws Exception {
+        String employeeUuid = "another random uuid";
+        Employee employee = new Employee("Paul Lim", employeeUuid);
+        when(employeeRepository.find(employeeUuid)).thenReturn(employee);
+
+        ResponseEntity responseEntity = employeesController.showEmployee(employeeUuid);
+
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(responseEntity.getBody()).isEqualTo(employee);
     }
 
 }
