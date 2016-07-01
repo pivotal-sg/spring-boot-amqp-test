@@ -42,7 +42,7 @@ public class EmployeeService {
 
         System.out.println("Saved in database as: " + eventRepository.findOne(uuid));
 
-        this.rabbitTemplate.convertAndSend("event", employeeAdded);
+        this.rabbitTemplate.convertAndSend("event.employee", employeeAdded);
 
         return uuid;
     }

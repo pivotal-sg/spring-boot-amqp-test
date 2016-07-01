@@ -20,7 +20,7 @@ public class FakeRabbitTemplateConfiguration {
     @Autowired
     public RabbitTemplate rabbitTemplate(EmployeeEventHandler employeeEventHandler) {
         return new FakeRabbitTemplate(connectionFactory(),
-                                      Collections.singletonMap("event", employeeEventHandler));
+                                      Collections.singletonMap("event.employee", employeeEventHandler));
     }
 
     @Bean
