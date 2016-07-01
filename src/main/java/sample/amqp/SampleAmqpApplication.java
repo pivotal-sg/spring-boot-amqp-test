@@ -16,7 +16,10 @@
 
 package sample.amqp;
 
+import org.springframework.amqp.core.Binding;
+import org.springframework.amqp.core.BindingBuilder;
 import org.springframework.amqp.core.Queue;
+import org.springframework.amqp.core.TopicExchange;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,6 +49,19 @@ public class SampleAmqpApplication {
     @Bean
     public Queue eventQueue() {
         return new Queue("event");
+    }
+
+    @Bean
+    public Binding binding() {
+        return BindingBuilder
+                .bind(eventQueue())
+                .to(topicExchange())
+                .with("event.*");
+    }
+
+    @Bean
+    public TopicExchange topicExchange() {
+        return new TopicExchange("sample_amqp_topic_exchange");
     }
 
     @Bean
