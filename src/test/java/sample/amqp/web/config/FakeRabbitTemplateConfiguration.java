@@ -9,6 +9,8 @@ import org.springframework.context.annotation.Primary;
 import sample.amqp.EmployeeEventHandler;
 import sample.amqp.web.mocks.FakeRabbitTemplate;
 
+import java.util.Collections;
+
 import static org.mockito.Mockito.mock;
 
 @Configuration
@@ -17,7 +19,8 @@ public class FakeRabbitTemplateConfiguration {
     @Primary
     @Autowired
     public RabbitTemplate rabbitTemplate(EmployeeEventHandler employeeEventHandler) {
-        return new FakeRabbitTemplate(connectionFactory(), employeeEventHandler);
+        return new FakeRabbitTemplate(connectionFactory(),
+                                      Collections.singletonMap("event", employeeEventHandler));
     }
 
     @Bean

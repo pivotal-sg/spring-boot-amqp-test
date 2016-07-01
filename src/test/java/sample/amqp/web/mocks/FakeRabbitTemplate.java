@@ -7,74 +7,56 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.core.MethodParameter;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.util.Assert;
-import sample.amqp.EmployeeEventHandler;
 import sample.amqp.EventHandler;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class FakeRabbitTemplate extends RabbitTemplate {
-    private final List<EventHandler> eventHandlers;
+    private final Map<String, EventHandler> routingKeyAndEventHandlerMap;
 
-    public FakeRabbitTemplate(ConnectionFactory connectionFactory, EventHandler... eventHandlers) {
+    public FakeRabbitTemplate(ConnectionFactory connectionFactory,
+                              Map<String, EventHandler> routingKeyAndEventHandlerMap) {
         super(connectionFactory);
-        this.eventHandlers = Arrays.asList(eventHandlers);
+        this.routingKeyAndEventHandlerMap = routingKeyAndEventHandlerMap;
     }
 
     @Override
     public void convertAndSend(String routingKey, Object object) throws AmqpException {
-        if (routingKey.equals("event")) {
-            invokeMethod(getEventHandler(EmployeeEventHandler.class), object);
-        }
-        else {
-            throw new UnsupportedOperationException("No supported event handlers available for routing key: " + routingKey);
-        }
-
-    }
-
-    @SuppressWarnings("unchecked")
-    private <E extends EventHandler> E getEventHandler(Class<E> eventHandlerType) {
-        RuntimeException exception = new RuntimeException("Event handler not found for type: " + eventHandlerType.getCanonicalName());
-        return this.eventHandlers.stream()
-                .filter(eventHandlerType::isInstance)
-                .map(e -> (E) e)
-                .findFirst()
-                .orElseThrow(() -> exception);
+        Assert.isTrue(routingKeyAndEventHandlerMap.containsKey(routingKey),
+                      "No supported event handlers available for routing key: " + routingKey);
+        invokeMethod(routingKeyAndEventHandlerMap.get(routingKey), object);
     }
 
     private void invokeMethod(EventHandler eventHandler, Object object) {
         try {
-            getMethod(object, eventHandler).invoke(eventHandler, object);
+            getRabbitHandlerMethod(eventHandler, object)
+                    .invoke(eventHandler, object);
         } catch (IllegalAccessException | InvocationTargetException e) {
             e.printStackTrace();
         }
     }
 
-    private Method getMethod(Object object, EventHandler eventHandler) {
-        List<Method> matchedMethods = getMethodsWithMatchingParameterType(eventHandler, object);
+    private Method getRabbitHandlerMethod(EventHandler eventHandler, Object object) {
+        List<Method> matchedMethods = getRabbitHandlerMethodsWithMatchingParameterType(eventHandler, object);
 
-        assertMethodsExist(eventHandler, matchedMethods);
-        assertOnlyOneMethod(eventHandler, matchedMethods);
+        Assert.notEmpty(matchedMethods,
+                        getEventHandlerCanonicalName(eventHandler) + " does not have any methods annotated with @RabbitHandler");
+        Assert.state(matchedMethods.size() == 1,
+                     getEventHandlerCanonicalName(eventHandler) + " has more than 1 annotated @RabbitHandler method with the same parameter type");
 
         return matchedMethods.get(0);
     }
 
-    private void assertOnlyOneMethod(EventHandler eventHandler, List<Method> matchedMethods) {
-        String eventHandlerClassName = eventHandler.getClass().getCanonicalName();
-        Assert.state(matchedMethods.size() == 1,
-                     eventHandlerClassName + " has more than 1 annotated @RabbitHandler method with the same parameter type");
+    private String getEventHandlerCanonicalName(EventHandler eventHandler) {
+        return eventHandler.getClass().getCanonicalName();
     }
 
-    private void assertMethodsExist(EventHandler eventHandler, List<Method> matchedMethods) {
-        String eventHandlerClassName = eventHandler.getClass().getCanonicalName();
-        Assert.notEmpty(matchedMethods,
-                        eventHandlerClassName + " does not have any methods annotated with @RabbitHandler");
-    }
-
-    private List<Method> getMethodsWithMatchingParameterType(EventHandler eventHandler, Object object) {
+    private List<Method> getRabbitHandlerMethodsWithMatchingParameterType(EventHandler eventHandler, Object object) {
         Method[] methods = eventHandler.getClass().getMethods();
         return Arrays.stream(methods)
                 .filter(m -> m.isAnnotationPresent(RabbitHandler.class))
